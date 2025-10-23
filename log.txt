@@ -1,0 +1,8 @@
+20:30:03.643131 execve("./vuln", ["./vuln"], 0x7fffffffe638 /* 19 vars */) = 0
+20:30:03.647659 arch_prctl(0x3001 /* ARCH_??? */, 0x7fffffffe590) = -1 EINVAL (Invalid argument)
+20:30:03.648834 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory)
+20:30:03.649527 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+20:30:03.650861 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+20:30:03.655311 arch_prctl(ARCH_SET_FS, 0x7ffff7fc1540) = 0
+20:30:16.259917 --- SIGSEGV {si_signo=SIGSEGV, si_code=SI_KERNEL, si_addr=NULL} ---
+20:30:17.429817 +++ killed by SIGSEGV (core dumped) +++
