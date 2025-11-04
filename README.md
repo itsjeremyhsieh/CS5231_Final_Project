@@ -1,4 +1,4 @@
-# CS5231 Final Project - Log Exploit Detector
+# CS5231 Systems Security Final Project: Traced-based Exploit Detection
 
 This project contains a pipeline that parses log messages, detects known exploitation patterns, builds provenance graphs, and asks OpenAI to generate a concise paragraph for IT security staff summarizing findings.
 

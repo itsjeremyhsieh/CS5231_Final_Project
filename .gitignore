@@ -1,1 +1,6 @@
 /venv
+/graphs_*
+/__pycache__/
+*.pyc
+.DS_Store
+.env
