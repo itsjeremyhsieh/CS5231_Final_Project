@@ -16,6 +16,11 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     missing.append("networkx and matplotlib")
+try:
+    from openai import OpenAI
+    import base64
+except ImportError:
+    missing.append("openai")
 
 if missing:
     print("Missing packages:", ", ".join(missing))
@@ -179,6 +184,70 @@ def detect_exploits(events):
 
     return detected
 
+
+def call_openai_for_summary(graph_paths, terminal_output):
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY environment variable is not set.")
+
+    client = OpenAI(api_key=api_key)
+
+    attachments = []
+    for p in graph_paths:
+        try:
+            with open(p, "rb") as f:
+                data = f.read()
+            size = len(data)
+            b64 = base64.b64encode(data).decode("utf-8")
+            include_full = size <= 200_000
+            attachments.append({"filename": os.path.basename(p), "size": size, "included": include_full, "b64": b64 if include_full else None})
+        except Exception as e:
+            attachments.append({"filename": os.path.basename(p), "size": 0, "error": str(e)})
+
+    att_lines = []
+    for a in attachments:
+        if a.get("error"):
+            att_lines.append(f"{a['filename']}: error reading ({a['error']})")
+        elif a["included"]:
+            att_lines.append(f"{a['filename']}: included as base64 (size {a['size']} bytes)")
+        else:
+            att_lines.append(f"{a['filename']}: not embedded (size {a['size']} bytes)")
+
+    user_msg = (
+        "You are a helpful assistant experienced in IT security.\n"
+        "I will provide pipeline output and a set of provenance graph images (some may be embedded as base64).\n"
+        "Using that information, produce a concise paragraph (3-6 sentences) directed to IT security personnel that summarizes the findings, the level of concern, and immediate recommended next steps.\n\n"
+        f"Pipeline output:\n{terminal_output}\n\n"
+        "Graph attachments summary:\n"
+        + "\n".join(att_lines)
+        + "\n\n"
+        "If base64 data is provided for an image, assume it accurately represents that provenance graph. Do not invent facts beyond what's shown. Be actionable and concise."
+    )
+
+    # Append image base64 content if included
+    if any(a.get("b64") for a in attachments):
+        user_msg += "\nAttached images (base64):\n"
+        for a in attachments:
+            if a.get("b64"):
+                user_msg += f"---BEGIN {a['filename']}---\n{a['b64']}\n---END {a['filename']}---\n"
+
+    messages = [
+        {"role": "system", "content": "You are concise and professional. Produce a paragraph for IT security operations staff."},
+        {"role": "user", "content": user_msg},
+    ]
+
+    resp = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+
+    content = None
+    try:
+        content = resp.choices[0].message.content
+    except Exception:
+        try:
+            content = resp["choices"][0]["message"]["content"]
+        except Exception:
+            content = str(resp)
+    return content.strip() if content else ""
+
 def build_graph(events, has_threat):
     import networkx as nx
     G = nx.DiGraph()
@@ -205,6 +274,7 @@ def draw_graph(G, postfix="", title="Provenance Graph"):
     plt.savefig(out_path)
     plt.close()
     print(f"    Saved graph to {out_path}")
+    return out_path
 
 def main():
     if len(sys.argv) > 1:
@@ -220,15 +290,27 @@ def main():
     print(f"   Parsed {len(events)} events.")
     exploits = detect_exploits(events)
 
-    print("\nExploit Detection Report:")
+    # Build a textual report (also printed) so we can send it to OpenAI
+    report_lines = []
+    report_lines.append("Exploit Detection Report:")
     if not exploits:
-        print("No known exploits detected.")
+        report_lines.append("No known exploits detected.")
+        print("\n" + report_lines[0])
+        print(report_lines[1])
     else:
+        print("\nExploit Detection Report:")
         for ex in exploits:
-            print(f"- {ex['name']} ({ex['severity']}, {ex['confidence']}%)")
+            line = f"- {ex['name']} ({ex['severity']}, {ex['confidence']}%)"
+            report_lines.append(line)
+            print(line)
             if ex["matched"]:
-                print(f"   ↪ Matched patterns: {', '.join(ex['matched'])}")
+                mp = f"   ↪ Matched patterns: {', '.join(ex['matched'])}"
+                report_lines.append(mp)
+                print(mp)
 
+    # Build graphs for each exploit (if any) and collect graph paths
+    graph_paths = []
+    if exploits:
         for ex in exploits:
             ex_id = ex['id']
             matched_patterns = [p.lower() for p in ex['matched']]
@@ -237,10 +319,22 @@ def main():
                 continue
             print(f"\nBuilding graph for {ex['name']} with {len(relevant_events)} events...")
             G = build_graph(relevant_events, has_threat=True)
-            draw_graph(G, postfix=ex_id, title=f"Provenance: {ex['name']}")
+            path = draw_graph(G, postfix=ex_id, title=f"Provenance: {ex['name']}")
+            graph_paths.append(path)
 
     summary_graph = build_graph(events, has_threat=bool(exploits))
-    draw_graph(summary_graph, postfix="all", title="Provenance: All Events")
+    all_path = draw_graph(summary_graph, postfix="all", title="Provenance: All Events")
+    graph_paths.append(all_path)
+
+    terminal_output = "\n".join(report_lines)
+
+    try:
+        summary_paragraph = call_openai_for_summary(graph_paths, terminal_output)
+        if summary_paragraph:
+            print("\nOpenAI-generated paragraph:\n")
+            print(summary_paragraph)
+    except Exception as e:
+        print(f"OpenAI summary call failed: {e}")
 
 if __name__ == "__main__":
     main()
