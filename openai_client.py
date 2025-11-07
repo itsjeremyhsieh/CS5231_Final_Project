@@ -38,19 +38,28 @@ def call_openai_for_summary(graph_paths, terminal_output, model="gpt-4o-mini"):
         else:
             att_lines.append(f"{a['filename']}: not embedded (size {a['size']} bytes)")
 
+    try:
+        lines = terminal_output.splitlines()
+    except Exception:
+        lines = [str(terminal_output)]
+    tail_lines = lines[-80:]
+    terminal_short = "\n".join(tail_lines)
+    if len(terminal_short) > 4000:
+        terminal_short = terminal_short[-4000:]
+
     user_msg = (
         "You are a helpful assistant experienced in IT security.\n"
-        "I will provide pipeline output and a set of provenance graph images (some may be embedded as base64).\n"
-        "Using that information, produce a concise paragraph (3-6 sentences) directed to IT security personnel that summarizes the findings, the level of concern, and immediate recommended next steps.\n\n"
-        f"Pipeline output:\n{terminal_output}\n\n"
+        "I will provide a short excerpt of the pipeline output and a set of provenance graph images (filenames listed).\n"
+        "Using that information, produce a concise paragraph (3-5 sentences) directed to IT security personnel that summarizes the findings, the level of concern, and immediate recommended next steps.\n\n"
+        f"Pipeline output (excerpt, last lines):\n{terminal_short}\n\n"
         "Graph attachments summary:\n"
         + "\n".join(att_lines)
         + "\n\n"
-        "If base64 data is provided for an image, assume it accurately represents that provenance graph. Do not invent facts beyond what's shown. Be actionable and concise."
+        "Do not invent facts beyond what's shown. Be actionable and concise."
     )
 
-    # Append image base64 content if included
-    if any(a.get("b64") for a in attachments):
+    embed_images = os.getenv("OPENAI_EMBED_IMAGES", "false").lower() in ("1", "true", "yes")
+    if embed_images and any(a.get("b64") for a in attachments):
         user_msg += "\nAttached images (base64):\n"
         for a in attachments:
             if a.get("b64"):

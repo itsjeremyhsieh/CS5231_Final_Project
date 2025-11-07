@@ -56,19 +56,13 @@ def main():
                 report_lines.append(mp)
                 print(mp)
 
-    # Create a timestamped output folder for this run's artifacts
-    timestamp_folder = datetime.utcnow().strftime("graphs_%Y%m%dT%H%M%SZ")
+    timestamp_folder = datetime.now().strftime("graphs_%Y%m%dT%H%M%SZ")
     os.makedirs(timestamp_folder, exist_ok=True)
 
-    # sessionize (kept for operator inspection)
-    sessions = sessionize_events(events, timeout_seconds=600)
-
-    # Build graphs and map them to detections for the JSON report
     graph_entries = []  # list of {path: str, detection_ids: [str], name: str}
     if exploits:
         for ex in exploits:
             ex_id = ex['id']
-            # if detection provides explicit evidence event ids, use those
             if ex.get('evidence_event_ids'):
                 relevant_events = [e for e in events if e.id in ex['evidence_event_ids']]
             else:
@@ -81,7 +75,6 @@ def main():
             path = draw_graph(G, postfix=ex_id, title=f"Provenance: {ex['name']}", out_dir=timestamp_folder)
             graph_entries.append({"path": path, "detection_ids": [ex_id], "name": ex.get('name')})
 
-    # summary/all-events graph — map to all detection ids (empty if none)
     summary_graph = build_graph(events, has_threat=bool(exploits))
     all_path = draw_graph(summary_graph, postfix="all", title="Provenance: All Events", out_dir=timestamp_folder)
     all_detection_ids = [ex.get('id') for ex in exploits] if exploits else []
@@ -89,10 +82,9 @@ def main():
 
     terminal_output = "\n".join(report_lines)
 
-    # write JSON report
     report_obj = {
         'run_id': str(uuid.uuid4()),
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now().isoformat(),
         'num_events': len(events),
         'detections': exploits,
         'artifacts': {

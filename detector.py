@@ -50,6 +50,37 @@ KNOWN_EXPLOITS = {
         "severity": "CRITICAL",
         "patterns": ["SIGSEGV", "core dumped", "stack smashing detected", "memory violation", "killed by SIGSEGV"]
     },
+    "control_flow_integrity": {
+        "name": "Control Flow Integrity (CFI) Violation",
+        "description": "Indications that control-flow integrity protections were bypassed or triggered (possible code-reuse or memory corruption exploit).",
+        "severity": "CRITICAL",
+        "patterns": [
+            r"\bcontrol\s*flow\s*guard\b",
+            r"\bcontrol[- ]flow integrity\b",
+            r"\bcontrol[- ]flow check failed\b",
+            r"\bblocked by control flow guard\b",
+            r"\bCFI\b",
+            r"\bcfg\b",
+            r"\billegal instruction\b",
+            r"\bSIGILL\b",
+            r"\bSIGSEGV\b",
+            r"\bSIGABRT\b",
+            r"\bcore dumped\b",
+            r"\bstack pivot\b",
+            r"\bstack smashing\b",
+            r"\breturn (address|frame).*(corrupt|corrupted|corruption)\b",
+            r"\breturn address corrupted\b",
+            r"\bKASAN\b",
+            r"\bASAN\b",
+            r"\bUBSAN\b",
+            r"\buse-after-free\b",
+            r"\bheap-use-after-free\b",
+            r"\bkernel panic\b",
+            r"\bBUG:\b",
+            r"\bpanic:\b",
+            r"\bcontrol[- ]flow violation\b",
+        ]
+    },
 }
 
 

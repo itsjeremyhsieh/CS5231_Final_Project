@@ -11,7 +11,6 @@ def parse_iso(ts):
 
 
 def run_drain3_parse(logs):
-    """Parse raw log dicts into Event objects using drain3 template miner."""
     try:
         from drain3 import TemplateMiner
         from drain3.file_persistence import FilePersistence
@@ -38,7 +37,6 @@ def run_drain3_parse(logs):
 
 
 def sessionize_events(events, timeout_seconds=600):
-    """Group events into sessions by src_ip (or host) using an inactivity timeout."""
     sessions = []
     cur_by_src = {}
     for e in sorted(events, key=lambda x: x.timestamp):
@@ -60,7 +58,7 @@ def sessionize_events(events, timeout_seconds=600):
     return sessions
 
 
-# small sample logs kept for convenience
+# small sample logs 
 SAMPLE_LOGS = [
     {"timestamp": "2025-10-22T10:00:00", "host": "hostA", "message": "Failed login for user root", "src_ip": "10.0.0.5"},
     {"timestamp": "2025-10-22T10:00:05", "host": "hostA", "message": "Failed login for user root", "src_ip": "10.0.0.5"},
