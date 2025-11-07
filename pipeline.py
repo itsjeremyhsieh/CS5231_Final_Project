@@ -22,7 +22,7 @@ from parser import run_drain3_parse, sessionize_events, SAMPLE_LOGS
 from detector import detect_exploits
 from graph import build_graph, draw_graph
 from openai_client import call_openai_for_summary
-from reporting import write_json_report, send_webhook_alert
+from reporting import write_json_report
 
 
 def main():
@@ -63,7 +63,8 @@ def main():
     # sessionize (kept for operator inspection)
     sessions = sessionize_events(events, timeout_seconds=600)
 
-    graph_paths = []
+    # Build graphs and map them to detections for the JSON report
+    graph_entries = []  # list of {path: str, detection_ids: [str], name: str}
     if exploits:
         for ex in exploits:
             ex_id = ex['id']
@@ -78,11 +79,13 @@ def main():
             print(f"\nBuilding graph for {ex['name']} with {len(relevant_events)} events...")
             G = build_graph(relevant_events, has_threat=True)
             path = draw_graph(G, postfix=ex_id, title=f"Provenance: {ex['name']}", out_dir=timestamp_folder)
-            graph_paths.append(path)
+            graph_entries.append({"path": path, "detection_ids": [ex_id], "name": ex.get('name')})
 
+    # summary/all-events graph — map to all detection ids (empty if none)
     summary_graph = build_graph(events, has_threat=bool(exploits))
     all_path = draw_graph(summary_graph, postfix="all", title="Provenance: All Events", out_dir=timestamp_folder)
-    graph_paths.append(all_path)
+    all_detection_ids = [ex.get('id') for ex in exploits] if exploits else []
+    graph_entries.append({"path": all_path, "detection_ids": all_detection_ids, "name": "All Events"})
 
     terminal_output = "\n".join(report_lines)
 
@@ -93,7 +96,7 @@ def main():
         'num_events': len(events),
         'detections': exploits,
         'artifacts': {
-            'graphs': graph_paths,
+            'graphs': graph_entries,
             'folder': timestamp_folder
         }
     }
@@ -102,7 +105,8 @@ def main():
     print(f"Wrote JSON report to {report_path}")
 
     try:
-        summary_paragraph = call_openai_for_summary(graph_paths, terminal_output)
+        graph_paths_to_send = [g['path'] for g in graph_entries]
+        summary_paragraph = call_openai_for_summary(graph_paths_to_send, terminal_output)
         if summary_paragraph:
             print("\nOpenAI-generated paragraph:\n")
             print(summary_paragraph)
