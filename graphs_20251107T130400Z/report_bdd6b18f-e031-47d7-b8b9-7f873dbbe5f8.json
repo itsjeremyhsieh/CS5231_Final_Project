@@ -1,0 +1,57 @@
+{
+  "run_id": "bdd6b18f-e031-47d7-b8b9-7f873dbbe5f8",
+  "timestamp": "2025-11-07T13:04:00.349403",
+  "num_events": 7,
+  "detections": [
+    {
+      "id": "command_injection",
+      "name": "Command Injection",
+      "severity": "CRITICAL",
+      "confidence": 5,
+      "matched": [
+        "| nc"
+      ]
+    },
+    {
+      "id": "buffer_overflow",
+      "name": "Buffer Overflow Attempt",
+      "severity": "CRITICAL",
+      "confidence": 70,
+      "matched": [
+        "crash / core / SIGSEGV",
+        "SIGSEGV"
+      ]
+    },
+    {
+      "id": "control_flow_integrity",
+      "name": "Control Flow Integrity (CFI) Violation",
+      "severity": "CRITICAL",
+      "confidence": 5,
+      "matched": [
+        "\\bSIGSEGV\\b"
+      ]
+    }
+  ],
+  "artifacts": {
+    "graphs": [
+      {
+        "path": "graphs_20251107T130400Z/provenance_graph_buffer_overflow.png",
+        "detection_ids": [
+          "buffer_overflow"
+        ],
+        "name": "Buffer Overflow Attempt"
+      },
+      {
+        "path": "graphs_20251107T130400Z/provenance_graph_all.png",
+        "detection_ids": [
+          "command_injection",
+          "buffer_overflow",
+          "control_flow_integrity"
+        ],
+        "name": "All Events"
+      }
+    ],
+    "folder": "graphs_20251107T130400Z"
+  },
+  "llm_summary": "The recent exploit detection report indicates multiple critical vulnerabilities, including a 70% likelihood of a buffer overflow attempt and lower-level concerns with command injection (5%) and control flow integrity violations (5%). Immediate action is required to assess the potential impact of the buffer overflow, which could lead to application instability or system crashes. IT security personnel should prioritize a detailed analysis of the provided provenance graphs to identify the source of the vulnerabilities and implement necessary patches or mitigations without delay. Further investigation is critical to prevent exploitation and enhance system defenses against similar threats."
+}
