@@ -1,0 +1,18 @@
+{
+  "run_id": "830e0e73-9955-476d-a1ab-a6fc6c6a911c",
+  "timestamp": "2025-11-08T15:35:43.756131",
+  "num_events": 35,
+  "detections": [],
+  "detection_threshold": 50,
+  "artifacts": {
+    "graphs": [
+      {
+        "path": "graphs_20251108T153543Z/provenance_graph_all.png",
+        "detection_ids": [],
+        "name": "All Events"
+      }
+    ],
+    "folder": "graphs_20251108T153543Z"
+  },
+  "llm_summary": "The recent exploit detection report indicates that no known exploits were detected with a severity above the threshold of 50%, suggesting a currently low level of concern regarding potential vulnerabilities. However, it is essential to review the provided provenance graph (provenance_graph_all.png) for any unusual activity or patterns that may require further investigation. Immediate next steps include analyzing the graph to ensure all systems remain monitored and logging any anomalies for future reference. Regular updates to threat intelligence sources should also be maintained to enhance detection capabilities moving forward."
+}

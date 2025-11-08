@@ -1,0 +1,353 @@
+[
+  {
+    "timestamp": "2025-11-08T15:26:24.385073",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "execve(\"./buffer_overflow\", [\"./buffer_overflow\", \"AABBCCDDEEFFGGHHIIJJ\"], 0x7ffffd548088 /* 18 vars */)",
+    "template": "execve",
+    "syscall": "execve",
+    "args": "\"./buffer_overflow\", [\"./buffer_overflow\", \"AABBCCDDEEFFGGHHIIJJ\"], 0x7ffffd548088 /* 18 vars */"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.389027",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "brk(NULL)",
+    "template": "brk",
+    "syscall": "brk",
+    "args": "NULL"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.389482",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "arch_prctl(0x3001 /* ARCH_??? */, 0x7ffd89b48f70)",
+    "template": "arch_prctl",
+    "syscall": "arch_prctl",
+    "args": "0x3001 /* ARCH_??? */, 0x7ffd89b48f70"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.390587",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "access(\"/etc/ld.so.preload\", R_OK)",
+    "template": "access",
+    "syscall": "access",
+    "args": "\"/etc/ld.so.preload\", R_OK"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.391178",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "openat(AT_FDCWD, \"/etc/ld.so.cache\", O_RDONLY|O_CLOEXEC)",
+    "template": "openat",
+    "syscall": "openat",
+    "args": "AT_FDCWD, \"/etc/ld.so.cache\", O_RDONLY|O_CLOEXEC"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.391686",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "fstat(3, {st_mode=S_IFREG|0644, st_size=33309, ...})",
+    "template": "fstat",
+    "syscall": "fstat",
+    "args": "3, {st_mode=S_IFREG|0644, st_size=33309, ...}"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.392143",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(NULL, 33309, PROT_READ, MAP_PRIVATE, 3, 0)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "NULL, 33309, PROT_READ, MAP_PRIVATE, 3, 0"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.392565",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "close(3)",
+    "template": "close",
+    "syscall": "close",
+    "args": "3"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.392990",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "openat(AT_FDCWD, \"/lib/x86_64-linux-gnu/libc.so.6\", O_RDONLY|O_CLOEXEC)",
+    "template": "openat",
+    "syscall": "openat",
+    "args": "AT_FDCWD, \"/lib/x86_64-linux-gnu/libc.so.6\", O_RDONLY|O_CLOEXEC"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.393447",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "read(3, \"\\177ELF\\2\\1\\1\\3\\0\\0\\0\\0\\0\\0\\0\\0\\3\\0>\\0\\1\\0\\0\\0\\300A\\2\\0\\0\\0\\0\\0\"..., 832)",
+    "template": "read",
+    "syscall": "read",
+    "args": "3, \"\\177ELF\\2\\1\\1\\3\\0\\0\\0\\0\\0\\0\\0\\0\\3\\0>\\0\\1\\0\\0\\0\\300A\\2\\0\\0\\0\\0\\0\"..., 832"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.394083",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "pread64(3, \"\\6\\0\\0\\0\\4\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0\"..., 784, 64)",
+    "template": "pread64",
+    "syscall": "pread64",
+    "args": "3, \"\\6\\0\\0\\0\\4\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0\"..., 784, 64"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.394526",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "pread64(3, \"\\4\\0\\0\\0\\20\\0\\0\\0\\5\\0\\0\\0GNU\\0\\2\\0\\0\\300\\4\\0\\0\\0\\3\\0\\0\\0\\0\\0\\0\\0\", 32, 848)",
+    "template": "pread64",
+    "syscall": "pread64",
+    "args": "3, \"\\4\\0\\0\\0\\20\\0\\0\\0\\5\\0\\0\\0GNU\\0\\2\\0\\0\\300\\4\\0\\0\\0\\3\\0\\0\\0\\0\\0\\0\\0\", 32, 848"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.394942",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "pread64(3, \"\\4\\0\\0\\0\\24\\0\\0\\0\\3\\0\\0\\0GNU\\0W\\222s/x1X\\306o\\264\\363udX\\312$\"..., 68, 880)",
+    "template": "pread64",
+    "syscall": "pread64",
+    "args": "3, \"\\4\\0\\0\\0\\24\\0\\0\\0\\3\\0\\0\\0GNU\\0W\\222s/x1X\\306o\\264\\363udX\\312$\"..., 68, 880"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.395358",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "fstat(3, {st_mode=S_IFREG|0755, st_size=2029592, ...})",
+    "template": "fstat",
+    "syscall": "fstat",
+    "args": "3, {st_mode=S_IFREG|0755, st_size=2029592, ...}"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.395774",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.396208",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "pread64(3, \"\\6\\0\\0\\0\\4\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0\"..., 784, 64)",
+    "template": "pread64",
+    "syscall": "pread64",
+    "args": "3, \"\\6\\0\\0\\0\\4\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0@\\0\\0\\0\\0\\0\\0\\0\"..., 784, 64"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.396620",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "pread64(3, \"\\4\\0\\0\\0\\20\\0\\0\\0\\5\\0\\0\\0GNU\\0\\2\\0\\0\\300\\4\\0\\0\\0\\3\\0\\0\\0\\0\\0\\0\\0\", 32, 848)",
+    "template": "pread64",
+    "syscall": "pread64",
+    "args": "3, \"\\4\\0\\0\\0\\20\\0\\0\\0\\5\\0\\0\\0GNU\\0\\2\\0\\0\\300\\4\\0\\0\\0\\3\\0\\0\\0\\0\\0\\0\\0\", 32, 848"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.397019",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "pread64(3, \"\\4\\0\\0\\0\\24\\0\\0\\0\\3\\0\\0\\0GNU\\0W\\222s/x1X\\306o\\264\\363udX\\312$\"..., 68, 880)",
+    "template": "pread64",
+    "syscall": "pread64",
+    "args": "3, \"\\4\\0\\0\\0\\24\\0\\0\\0\\3\\0\\0\\0GNU\\0W\\222s/x1X\\306o\\264\\363udX\\312$\"..., 68, 880"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.397496",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(NULL, 2037344, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "NULL, 2037344, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.397882",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(0x7fa7ce906000, 1540096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x22000)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "0x7fa7ce906000, 1540096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x22000"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.398291",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(0x7fa7cea7e000, 319488, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x19a000)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "0x7fa7cea7e000, 319488, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x19a000"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.398678",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(0x7fa7ceacc000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e7000)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "0x7fa7ceacc000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e7000"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.399109",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(0x7fa7cead2000, 13920, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "0x7fa7cead2000, 13920, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.399554",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "close(3)",
+    "template": "close",
+    "syscall": "close",
+    "args": "3"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.400027",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "arch_prctl(ARCH_SET_FS, 0x7fa7cead7540)",
+    "template": "arch_prctl",
+    "syscall": "arch_prctl",
+    "args": "ARCH_SET_FS, 0x7fa7cead7540"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.400619",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mprotect(0x7fa7ceacc000, 16384, PROT_READ)",
+    "template": "mprotect",
+    "syscall": "mprotect",
+    "args": "0x7fa7ceacc000, 16384, PROT_READ"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.401010",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mprotect(0x561b9f789000, 4096, PROT_READ)",
+    "template": "mprotect",
+    "syscall": "mprotect",
+    "args": "0x561b9f789000, 4096, PROT_READ"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.401534",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mprotect(0x7fa7ceb0e000, 4096, PROT_READ)",
+    "template": "mprotect",
+    "syscall": "mprotect",
+    "args": "0x7fa7ceb0e000, 4096, PROT_READ"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.401905",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "munmap(0x7fa7cead8000, 33309)",
+    "template": "munmap",
+    "syscall": "munmap",
+    "args": "0x7fa7cead8000, 33309"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.402612",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "writev(2, [{iov_base=\"*** \", iov_len=4}, {iov_base=\"stack smashing detected\", iov_len=23}, {iov_base=\" ***: terminated\\n\", iov_len=17}], 3)",
+    "template": "writev",
+    "syscall": "writev",
+    "args": "2, [{iov_base=\"*** \", iov_len=4}, {iov_base=\"stack smashing detected\", iov_len=23}, {iov_base=\" ***: terminated\\n\", iov_len=17}], 3"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.412936",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0)",
+    "template": "mmap",
+    "syscall": "mmap",
+    "args": "NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.413463",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "rt_sigprocmask(SIG_UNBLOCK, [ABRT], NULL, 8)",
+    "template": "rt_sigprocmask",
+    "syscall": "rt_sigprocmask",
+    "args": "SIG_UNBLOCK, [ABRT], NULL, 8"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.415748",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "rt_sigprocmask(SIG_BLOCK, ~[RTMIN RT_1], [], 8)",
+    "template": "rt_sigprocmask",
+    "syscall": "rt_sigprocmask",
+    "args": "SIG_BLOCK, ~[RTMIN RT_1], [], 8"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.416223",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "getpid()",
+    "template": "getpid",
+    "syscall": "getpid",
+    "args": ""
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.416583",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "gettid()",
+    "template": "gettid",
+    "syscall": "gettid",
+    "args": ""
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.416937",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "tgkill(1146, 1146, SIGABRT)",
+    "template": "tgkill",
+    "syscall": "tgkill",
+    "args": "1146, 1146, SIGABRT"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.417310",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "rt_sigprocmask(SIG_SETMASK, [], NULL, 8)",
+    "template": "rt_sigprocmask",
+    "syscall": "rt_sigprocmask",
+    "args": "SIG_SETMASK, [], NULL, 8"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:24.417806",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "15:26:24.417806 --- SIGABRT {si_signo=SIGABRT, si_code=SI_TKILL, si_pid=1146, si_uid=0} ---",
+    "template": "SIGABRT",
+    "syscall": "signal",
+    "args": "SIGABRT"
+  },
+  {
+    "timestamp": "2025-11-08T15:26:25.425416",
+    "host": "localhost",
+    "process": "vuln",
+    "message": "killed by SIGABRT (CORE DUMPED)",
+    "template": "SIGABRT",
+    "syscall": "crash",
+    "args": "SIGABRT (CORE DUMPED)"
+  }
+]

@@ -10,7 +10,7 @@ Features
 
 Quick start
 
-1. Create and activate a Python virtual environment (recommended):
+1. Create and activate a Python virtual environment:
 
 ```bash
 python3 -m venv .venv
@@ -40,6 +40,8 @@ python3 pipeline.py
 # or provide a log file (JSON array of objects with timestamp, host, message, src_ip)
 python3 pipeline.py logs.json
 ```
+
+5. To collect logs from syslog, you can run `strace -tt -T -o trace-vuln.log ./vuln` and then parse `trace-vuln.log` to extract relevant log messages into a JSON file.
 
 Outputs
 - A timestamped graph folder is created per run (format: `graphs_YYYYMMDDTHHMMSSZ`) containing PNG provenance graphs
