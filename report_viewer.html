@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset ="UTF-8">
+    <meta name="viewport" content="width= device-width, initial-scale=1.0">
+    <title>Security Report</title>
+    <style>
+        body{
+            font-family: Arial,sans-serif;
+            max-width:1400px;
+            margin: 20px auto;
+            padding:0 20px;
+            background:#f5f5f5;
+        }
+        .header{
+            background: #333;
+            color:white;
+            padding:   20px;
+            margin-bottom:20px;
+        }
+        .header h1{
+            margin:0 0 10px 0;
+            font-size: 1.8em;
+        }
+        .header-info {
+            font-size:0.9em;
+        }
+        .header-info span {
+            margin-right: 20px;
+        }
+        .file-selector {
+            background:white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border:2px dashed #ccc;
+            text-align:center;
+        }
+        .file-button{
+            background:#333;
+            color: white;
+            padding:10px 20px;
+            cursor:pointer;
+            display: inline-block;
+            margin-top:10px;
+        }
+        .file-button:hover{
+            background: #555;
+        }
+        input[type="file"]{
+            display:  none;
+        }
+        .summary-box {
+            background:#fffbea;
+            border-left:4px solid #f0ad4e;
+            padding:15px;
+            margin-bottom: 20px;
+        }
+        .stats{
+            display: grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap:10px;
+            margin-bottom:20px;
+        }
+        .stat {
+            background: white;
+            padding:15px;
+            text-align:center;
+            border: 2px solid #ddd;
+        }
+        .stat-number{
+            font-size:2em;
+            font-weight: bold;
+            margin-bottom:5px;
+        }
+        .critical{
+            border-color:#d9534f;
+            color: #d9534f;
+        }
+        .high {
+            border-color: #f0ad4e;
+            color:#f0ad4e;
+        }
+        .medium{
+            border-color:#f0ad4e;
+            color: #f0ad4e;
+        }
+        h2 {
+            border-bottom:2px solid #333;
+            padding-bottom: 10px;
+            margin:30px 0 15px 0;
+        }
+        .detections{
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+            margin-bottom:30px;
+        }
+        .detection {
+            background:white;
+            padding: 15px;
+            border-left:4px solid #ccc;
+        }
+        .detection.critical{
+            border-left-color:#d9534f;
+        }
+        .detection.high {
+            border-left-color: #f0ad4e;
+        }
+        .detection.medium{
+            border-left-color:#f0ad4e;
+        }
+        .detection-header {
+            display: flex;
+            justify-content:space-between;
+            margin-bottom:10px;
+        }
+        .detection-name{
+            font-weight:bold;
+        }
+        .badge{
+            background:#333;
+            color: white;
+            padding: 3px 8px;
+            font-size:0.75em;
+            text-transform: uppercase;
+        }
+        .badge.critical{
+            background:#d9534f;
+        }
+        .badge.high {
+            background: #f0ad4e;
+        }
+        .badge.medium {
+            background:#f0ad4e;
+        }
+        .confidence{
+            margin:10px 0;
+        }
+        .confidence-label {
+            font-size: 0.85em;
+            margin-bottom:5px;
+        }
+        .confidence-bar{
+            height: 6px;
+            background:#eee;
+        }
+        .confidence-fill {
+            height:100%;
+            background: #333;
+        }
+        .patterns{
+            margin-top: 10px;
+            padding-top:10px;
+            border-top:1px solid #eee;
+            font-size: 0.85em;
+        }
+        .patterns code {
+            background:#f5f5f5;
+            padding: 2px 6px;
+            margin:2px;
+            display:inline-block;
+        }
+        .graphs{
+            display: grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap: 20px;
+        }
+        .graph {
+            background:white;
+            border:1px solid #ddd;
+        }
+        .graph-title{
+            background: #f5f5f5;
+            padding:10px;
+            font-weight:bold;
+            border-bottom: 1px solid #ddd;
+        }
+        .graph-content {
+            padding:15px;
+            text-align:center;
+        }
+        .graph img{
+            max-width:100%;
+            cursor: pointer;
+        }
+        @media (max-width: 768px){
+            .stats{
+                grid-template-columns:repeat(2, 1fr);
+            }
+            .detections {
+                grid-template-columns:1fr;
+            }
+            .graphs{
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Security Vulnerability Detection Report</h1>
+        <div class="header-info">
+            <span>ID: <strong id="runId">-</strong></span>
+            <span>Time: <strong id="timestamp">-</strong></span>
+            <span>Events: <strong id="numEvents">-</strong></span>
+        </div></div>
+    <div class="file-selector">
+        <div>Select JSON Report File</div>
+        <label for="fileInput" class="file-button">Choose File</label>
+        <input type="file" id="fileInput" accept=".json"></div>
+    <div id="content" style="display:none;">
+        <div id="stats"></div>
+        <div id="summary" class="summary-box" style="display:none;">
+            <h3>AI Analysis</h3>
+            <p id="summaryText"></p></div>
+        <h2>Detected Threats</h2>
+        <div id="detections" class="detections"></div>
+        <h2>Provenance Graphs</h2>
+        <div id="graphs" class="graphs"></div>
+    </div>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(e){
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e){
+                try{
+                    const report = JSON.parse(e.target.result);
+                    displayReport(report);
+                }catch(error){
+                    alert('Error: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+        function displayReport(r){
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('runId').textContent = r.run_id.substring(0, 8);
+            document.getElementById('timestamp').textContent = new Date(r.timestamp).toLocaleString();
+            document.getElementById('numEvents').textContent = r.num_events;
+            const crit =r.detections.filter(d => d.severity === 'CRITICAL').length;
+            const high = r.detections.filter(d=> d.severity === 'HIGH').length;
+            const med= r.detections.filter(d => d.severity === 'MEDIUM').length;
+            document.getElementById('stats').innerHTML = `
+                <div class="stats"><div class="stat critical">
+                        <div class="stat-number">${crit}</div>
+                        <div>Critical</div></div>
+                    <div class=  "stat high">
+                        <div class="stat-number">${high}</div>
+                        <div>High</div></div>
+                    <div class="stat medium">
+                        <div class="stat-number">${med}</div>
+                        <div>Medium</div></div>
+                <div class="stat">
+                        <div class="stat-number">${r.detections.length}</div>
+                        <div>Total</div></div> </div>
+            `;
+            if(r.llm_summary){
+                document.getElementById('summary').style.display = 'block';
+                document.getElementById('summaryText').textContent = r.llm_summary;
+            }
+            const detDiv = document.getElementById('detections');
+            detDiv.innerHTML = '';
+            r.detections.forEach(d => {
+                const sev = d.severity.toLowerCase();
+                const patterns = d.matched ? d.matched.map(m => `<code>${m}</code>`).join(' ') : '';
+                detDiv.innerHTML += `
+                    <div class="detection ${sev}">
+                        <div class="detection-header">
+                            <span class ="detection-name">${d.name}</span>
+                            <span class ="badge ${sev}">${d.severity}</span>
+                        </div>
+                        <div class="confidence">
+                            <div class="confidence-label">Confidence: ${d.confidence}%</div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width:${d.confidence}%"></div>
+                            </div></div>
+                        ${patterns ? `<div class="patterns"><strong>Patterns:</strong> ${patterns}</div>` : ''}
+                    </div>
+                `;
+            });
+            const graphDiv = document.getElementById('graphs');
+            graphDiv.innerHTML = '';
+            if(r.artifacts && r.artifacts.graphs){
+                r.artifacts.graphs.forEach(g => {
+                    graphDiv.innerHTML += `
+                        <div class="graph">
+                            <div class="graph-title">${g.name}</div>
+                            <div class="graph-content">
+                                <img src="${g.path}" alt="${g.name}" onclick="window.open(this.src)">
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
