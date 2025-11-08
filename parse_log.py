@@ -112,7 +112,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="Output JSON file (default: logs.json)", default=None)
     args = parser.parse_args()
 
-    # if CLI args provided, override environment/defaults
     if args.input:
         os.environ["PARSE_INPUT"] = args.input
     if args.output:

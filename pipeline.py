@@ -1,10 +1,12 @@
 import argparse
 import json
 import os
-import sys
-import tempfile
 import uuid
 from datetime import datetime
+import webbrowser
+from urllib.parse import quote
+import shutil
+import copy
 
 missing = []
 for mod in ("drain3", "networkx", "matplotlib", "openai", "requests"):
@@ -114,6 +116,55 @@ def main():
             write_json_report(report_path, report_obj)
     except Exception as e:
         print(f"OpenAI summary call failed: {e}")
+
+    viewer_path = os.path.abspath("report_viewer.html")
+    if os.path.exists(viewer_path):
+        try:
+
+            dst_viewer = os.path.join(timestamp_folder, os.path.basename(viewer_path))
+            shutil.copy2(viewer_path, dst_viewer)
+
+            with open(viewer_path, 'r', encoding='utf-8') as f:
+                viewer_html = f.read()
+
+            embedded_report = copy.deepcopy(report_obj)
+            if embedded_report.get('artifacts') and embedded_report['artifacts'].get('graphs'):
+                for g in embedded_report['artifacts']['graphs']:
+                    try:
+                        g['path'] = os.path.basename(g.get('path', ''))
+                    except Exception:
+                        pass
+
+            embedded_json = json.dumps(embedded_report)
+            embedded_json = embedded_json.replace('</', '<\\/')
+
+            embed_tag = f"<script id=\"embeddedReport\" type=\"application/json\">{embedded_json}</script>"
+
+            insert_at = viewer_html.lower().find('<body')
+            if insert_at != -1:
+                insert_close = viewer_html.find('>', insert_at)
+                if insert_close != -1:
+                    new_html = viewer_html[: insert_close + 1] + '\n' + embed_tag + '\n' + viewer_html[insert_close + 1 :]
+                else:
+                    new_html = embed_tag + '\n' + viewer_html
+            else:
+                # fallback: prepend
+                new_html = embed_tag + '\n' + viewer_html
+
+            dst_embedded = os.path.join(timestamp_folder, 'report_viewer_embedded.html')
+            with open(dst_embedded, 'w', encoding='utf-8') as f:
+                f.write(new_html)
+
+            abs_dst_embedded = os.path.abspath(dst_embedded)
+            viewer_url = f"file://{abs_dst_embedded}"
+            webbrowser.open(viewer_url)
+            print(f"Opened embedded report viewer: {viewer_url}")
+            print(f"(embedded viewer written to {dst_embedded}; report path: {report_path})")
+        except Exception as e:
+            print(f"Failed to open report viewer in browser: {e}")
+            print(f"You can open the report manually: {viewer_path}?report={report_path}")
+    else:
+        print(f"Report viewer not found at {viewer_path}; please open it manually.")
 
 
 if __name__ == '__main__':

@@ -222,72 +222,6 @@
       <div id="graphs" class="graphs"></div>
     </div>
     <script>
-      // If this copy of the viewer contains an embedded report JSON (inserted by the pipeline),
-      // parse and display it immediately. This avoids needing to fetch local files via fetch().
-      (function() {
-        const embeddedEl = document.getElementById('embeddedReport');
-        if (embeddedEl) {
-          try {
-            const report = JSON.parse(embeddedEl.textContent);
-            displayReport(report);
-            // Don't proceed with other auto-load attempts
-            return;
-          } catch (e) {
-            console.warn('Failed to parse embedded report:', e);
-          }
-        }
-      })();
-      // Try to auto-load a report if `report` query param is provided.
-      async function tryLoadReportFromParam() {
-        const params = new URLSearchParams(window.location.search);
-        const rep = params.get("report");
-        if (!rep) return false;
-
-        // hide the file selector since we're auto-loading
-        document.querySelector('.file-selector').style.display = 'none';
-
-        // Resolve the report path against the viewer location so relative paths work
-        let resolvedUrl;
-        try {
-          resolvedUrl = new URL(rep, window.location.href).href;
-        } catch (e) {
-          resolvedUrl = rep;
-        }
-
-        try {
-          const resp = await fetch(resolvedUrl);
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const report = await resp.json();
-          displayReport(report);
-          return true;
-        } catch (err) {
-          console.warn("Auto-load failed for", resolvedUrl, err);
-          // fall back to file input
-          document.querySelector('.file-selector').style.display = '';
-          return false;
-        }
-      }
-
-      // If no `report` param is provided, attempt to auto-load a file named `report.json`
-      // in the same directory — this supports the pipeline copying the viewer into the
-      // report output folder and naming the report `report.json` (optional).
-      async function tryLoadDefaultLocalReport() {
-        const tryPath = new URL('./report.json', window.location.href).href;
-        try {
-          const resp = await fetch(tryPath);
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const report = await resp.json();
-          // hide file selector
-          document.querySelector('.file-selector').style.display = 'none';
-          displayReport(report);
-          return true;
-        } catch (err) {
-          // no default report found; leave file selector visible
-          return false;
-        }
-      }
-
-      // Wire file input fallback
       document
         .getElementById("fileInput")
         .addEventListener("change", function (e) {
@@ -304,11 +238,6 @@
           };
           reader.readAsText(file);
         });
-
-      tryLoadReportFromParam().then((ok) => {
-        if (!ok) tryLoadDefaultLocalReport();
-      });
-
       function displayReport(r) {
         document.getElementById("content").style.display = "block";
         document.getElementById("runId").textContent = r.run_id.substring(0, 8);

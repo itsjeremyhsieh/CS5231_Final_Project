@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 
-# Known exploits and rules
+
 KNOWN_EXPLOITS = {
     "brute_force_ssh": {
         "name": "SSH Brute Force Attack",
@@ -48,7 +48,7 @@ KNOWN_EXPLOITS = {
         "name": "Buffer Overflow Attempt",
         "description": "Crash due to stack smashing or memory corruption",
         "severity": "CRITICAL",
-        "patterns": ["SIGSEGV", "core dumped", "stack smashing detected", "memory violation", "killed by SIGSEGV"]
+        "patterns": ["SIGSEGV", "SIGABRT", "core dumped", "stack smashing detected", "memory violation", "killed by SIGSEGV"]
     },
     "control_flow_integrity": {
         "name": "Control Flow Integrity (CFI) Violation",
@@ -57,28 +57,17 @@ KNOWN_EXPLOITS = {
         "patterns": [
             r"\bcontrol\s*flow\s*guard\b",
             r"\bcontrol[- ]flow integrity\b",
-            r"\bcontrol[- ]flow check failed\b",
-            r"\bblocked by control flow guard\b",
-            r"\bCFI\b",
-            r"\bcfg\b",
             r"\billegal instruction\b",
             r"\bSIGILL\b",
             r"\bSIGSEGV\b",
             r"\bSIGABRT\b",
             r"\bcore dumped\b",
-            r"\bstack pivot\b",
-            r"\bstack smashing\b",
-            r"\breturn (address|frame).*(corrupt|corrupted|corruption)\b",
-            r"\breturn address corrupted\b",
             r"\bKASAN\b",
             r"\bASAN\b",
             r"\bUBSAN\b",
             r"\buse-after-free\b",
             r"\bheap-use-after-free\b",
             r"\bkernel panic\b",
-            r"\bBUG:\b",
-            r"\bpanic:\b",
-            r"\bcontrol[- ]flow violation\b",
         ]
     },
 }
@@ -114,12 +103,47 @@ def detect_exploits(events):
         matched_patterns = set()
         confidence = 0
 
-        for reg in compiled.get(exploit_id, []):
-            if any(reg.search(e.message) for e in events):
-                matched_patterns.add(reg.pattern)
-                confidence += 5
+        if exploit_id == "control_flow_integrity":
+            cfi_groups = {
+                'explicit_cfg': [re.compile(r"\bcontrol\s*flow\s*guard\b", re.IGNORECASE),
+                                 re.compile(r"\bcontrol[- ]flow integrity\b", re.IGNORECASE),
+                                 re.compile(r"\bblocked by control flow guard\b", re.IGNORECASE)],
+                'crash_signals': [re.compile(r"\bSIGSEGV\b", re.IGNORECASE),
+                                  re.compile(r"\bSIGILL\b", re.IGNORECASE),
+                                  re.compile(r"\bSIGABRT\b", re.IGNORECASE),
+                                  re.compile(r"\bcore dumped\b", re.IGNORECASE)],
+                'sanitizers': [re.compile(r"\bASAN\b", re.IGNORECASE),
+                               re.compile(r"\bKASAN\b", re.IGNORECASE),
+                               re.compile(r"\bUBSAN\b", re.IGNORECASE),
+                               re.compile(r"\buse-after-free\b", re.IGNORECASE),
+                               re.compile(r"\bheap-use-after-free\b", re.IGNORECASE)],
+                'memory_corruption': [re.compile(r"\bstack pivot\b", re.IGNORECASE),
+                                      re.compile(r"\bstack smashing\b", re.IGNORECASE),
+                                      re.compile(r"\breturn (address|frame).*(corrupt|corrupted|corruption)\b", re.IGNORECASE)],
+                'kernel': [re.compile(r"\bkernel panic\b", re.IGNORECASE),
+                           re.compile(r"\bBUG:\b", re.IGNORECASE),
+                           re.compile(r"\bpanic:\b", re.IGNORECASE)]
+            }
 
-        for src, evs in events_by_src.items():
+            groups_matched = []
+            for gname, regs in cfi_groups.items():
+                if any(r.search(e.message) for r in regs for e in events):
+                    groups_matched.append(gname)
+
+            # require at least two different indicator categories to consider high-confidence
+            if len(groups_matched) >= 2:
+                confidence += 75
+                matched_patterns.update(groups_matched)
+            elif len(groups_matched) == 1:
+                confidence += 10
+                matched_patterns.update(groups_matched)
+        else:
+            for reg in compiled.get(exploit_id, []):
+                if any(reg.search(e.message) for e in events):
+                    matched_patterns.add(reg.pattern)
+                    confidence += 5
+
+        for _, evs in events_by_src.items():
 
             if exploit_id == "brute_force_ssh":
                 failed_re = re.compile(r"failed (login|password)", re.IGNORECASE)

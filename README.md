@@ -37,7 +37,7 @@ export OPENAI_API_KEY="sk-..."
 # uses embedded SAMPLE_LOGS if no argument provided
 python3 pipeline.py
 
-# or provide a log file (JSON array of objects with timestamp, host, message, src_ip)
+# or provide a log file (JSON array)
 python3 pipeline.py logs.json
 ```
 

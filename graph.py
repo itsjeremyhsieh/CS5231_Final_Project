@@ -15,11 +15,6 @@ def _short(s, length=40):
 
 
 def build_graph(events, has_threat):
-    """Build a directed provenance graph with richer node metadata.
-
-    Each node label will include a short timestamp, host/src, a short template
-    and a wrapped short message so the rendered PNG is readable and useful.
-    """
     G = nx.DiGraph()
     for i, e in enumerate(events):
         ts_short = e.timestamp.strftime("%Y-%m-%d %H:%M:%S") if hasattr(e, 'timestamp') else ""
