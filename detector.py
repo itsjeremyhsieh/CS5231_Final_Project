@@ -50,6 +50,12 @@ KNOWN_EXPLOITS = {
         "severity": "CRITICAL",
         "patterns": ["SIGSEGV", "SIGABRT", "core dumped", "stack smashing detected", "memory violation", "killed by SIGSEGV"]
     },
+    "use_after_free": {
+        "name": "Use-After-Free (UAF) Detection",
+        "description": "Indicators that a use-after-free (heap-use-after-free) occurred, often reported by sanitizers or observed as 'use of freed memory' and double-free messages.",
+        "severity": "HIGH",
+        "patterns": [r"use-after-free", r"heap-use-after-free", r"use of freed memory", r"double free", r"AddressSanitizer: heap-use-after-free"]
+    },
     "control_flow_integrity": {
         "name": "Control Flow Integrity (CFI) Violation",
         "description": "Indications that control-flow integrity protections were bypassed or triggered (possible code-reuse or memory corruption exploit).",
@@ -85,6 +91,8 @@ def detect_exploits(events):
 
     detected = []
 
+    uaf_strace_re_global = re.compile(r"AddressSanitizer|heap-use-after-free|use-after-free|invalid (read|write) of size|double free|free\(|free\(\):|use of freed memory|= -1 EFAULT|EFAULT \(Bad address\)", re.IGNORECASE)
+
     def window_count(ev_list, regex, window_seconds=300):
         ev_list_sorted = sorted(ev_list, key=lambda x: x.timestamp)
         counts = 0
@@ -114,9 +122,7 @@ def detect_exploits(events):
                                   re.compile(r"\bcore dumped\b", re.IGNORECASE)],
                 'sanitizers': [re.compile(r"\bASAN\b", re.IGNORECASE),
                                re.compile(r"\bKASAN\b", re.IGNORECASE),
-                               re.compile(r"\bUBSAN\b", re.IGNORECASE),
-                               re.compile(r"\buse-after-free\b", re.IGNORECASE),
-                               re.compile(r"\bheap-use-after-free\b", re.IGNORECASE)],
+                               re.compile(r"\bUBSAN\b", re.IGNORECASE)],
                 'memory_corruption': [re.compile(r"\bstack pivot\b", re.IGNORECASE),
                                       re.compile(r"\bstack smashing\b", re.IGNORECASE),
                                       re.compile(r"\breturn (address|frame).*(corrupt|corrupted|corruption)\b", re.IGNORECASE)],
@@ -130,7 +136,6 @@ def detect_exploits(events):
                 if any(r.search(e.message) for r in regs for e in events):
                     groups_matched.append(gname)
 
-            # require at least two different indicator categories to consider high-confidence
             if len(groups_matched) >= 2:
                 confidence += 75
                 matched_patterns.update(groups_matched)
@@ -200,10 +205,23 @@ def detect_exploits(events):
                     matched_patterns.add("command injection indicators")
 
             elif exploit_id == "buffer_overflow":
-                bof_re = re.compile(r"sigsegv|core dumped|stack smashing|memory violation", re.IGNORECASE)
-                if any(bof_re.search(e.message) for e in evs):
-                    confidence += 65
-                    matched_patterns.add("crash / core / SIGSEGV")
+                    uaf_strace_re = re.compile(r"AddressSanitizer|heap-use-after-free|use-after-free|invalid (read|write) of size|double free|free\(|free\(\):|use of freed memory|= -1 EFAULT|EFAULT \(Bad address\)", re.IGNORECASE)
+                    if any(uaf_strace_re.search(e.message) for e in evs):
+                        matched_patterns.add("indicates use-after-free; suppress generic buffer-overflow label")
+                    else:
+                        bof_re = re.compile(r"sigsegv|core dumped|stack smashing|memory violation", re.IGNORECASE)
+                        if any(bof_re.search(e.message) for e in evs):
+                            confidence += 65
+                            matched_patterns.add("crash / core / SIGSEGV")
+
+            elif exploit_id == "use_after_free":
+                uaf_strace_re = re.compile(r"AddressSanitizer|heap-use-after-free|use-after-free|invalid (read|write) of size|double free|free\(|free\(\):|use of freed memory|= -1 EFAULT|EFAULT \(Bad address\)", re.IGNORECASE)
+                if any(uaf_strace_re.search(e.message) for e in evs):
+                    confidence += 85
+                    matched_patterns.add("use-after-free / ASAN or EFAULT indicators")
+
+        if exploit_id == 'buffer_overflow' and any(uaf_strace_re_global.search(e.message) for e in events):
+            confidence = 0
 
         if confidence > 0:
             detected.append({
